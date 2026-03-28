@@ -41,8 +41,14 @@ func main() {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
-		<-c
-		server.Unmount()
+		for {
+			s := <-c
+			log.Println("Signal", s, "catched: unmounting ...")
+			err := server.Unmount()
+			if err != nil {
+				log.Println("error:", err)
+			}
+		}
 	}()
 
 	server.Wait()
