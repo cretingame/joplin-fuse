@@ -24,7 +24,7 @@ get_auth_token() {
 save_token() {
   RESP=$(curl -X POST "$ADDRESS/auth")
   AUTH_TOKEN=$(echo "$RESP" | jq '.auth_token' | sed 's/\"//g')
-  read -p "Check Joplin and Press any key to continue ..."
+  read -rp "Check Joplin and Press any key to continue ..."
   RESP=$(curl "$ADDRESS/auth/check?auth_token=$AUTH_TOKEN")
   STATUS=$(echo "$RESP" | jq '.status' | sed 's/\"//g')
   if [[ "$STATUS" = "accepted" ]]; then
