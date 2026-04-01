@@ -48,6 +48,7 @@ func NewRoot(host string, tokenLocation string) (JoplinRoot, error) {
 		return JoplinRoot{}, err
 	}
 	for i := range notes {
+		// TODO: I will do this at note opening
 		noteResponse, err := GetNote(host, token, notes[i].Id)
 		if err != nil {
 			return JoplinRoot{}, err
@@ -62,7 +63,8 @@ func NewRoot(host string, tokenLocation string) (JoplinRoot, error) {
 			Id:        notes[i].Id,
 			Parent_id: notes[i].Parent_id,
 			Name:      name,
-			File: &fs.MemRegularFile{
+			// TODO: at note opening
+			MemRegularFile: &fs.MemRegularFile{
 				Data: []byte(noteResponse.Body),
 				Attr: fuse.Attr{
 					Mode:  0444,
@@ -150,7 +152,7 @@ func addNode(ctx context.Context, parentInode *fs.Inode, items []*Node, level in
 			addNode(ctx, childInode, v.Children, level+1)
 		case *NoteNode:
 			childInode := parentInode.NewPersistentInode(
-				ctx, v.File, v.File.StableAttr())
+				ctx, v, v.StableAttr())
 
 			parentInode.AddChild(v.Name, childInode, false)
 			addNode(ctx, childInode, v.Children, level+1)

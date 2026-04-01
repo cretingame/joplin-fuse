@@ -1,6 +1,12 @@
 package joplin
 
-import "github.com/hanwen/go-fuse/v2/fs"
+import (
+	"context"
+	"syscall"
+
+	"github.com/hanwen/go-fuse/v2/fs"
+	"github.com/hanwen/go-fuse/v2/fuse"
+)
 
 type Node interface {
 	Base() NodeBase
@@ -35,25 +41,41 @@ func (fn *FolderNode) AddChild(n *Node) {
 }
 
 type NoteNode struct {
+	*fs.MemRegularFile
+
 	Id        string
 	Parent_id string
 	Name      string
 	Children  []*Node
-
-	File *fs.MemRegularFile
 }
 
-func (nn NoteNode) Base() NodeBase {
+func (fn NoteNode) Base() NodeBase {
 	return NodeBase{
-		Id:        nn.Id,
-		Parent_id: nn.Parent_id,
-		Name:      nn.Name,
-		Children:  nn.Children,
+		Id:        fn.Id,
+		Parent_id: fn.Parent_id,
+		Name:      fn.Name,
+		Children:  fn.Children,
 	}
 }
 
-func (nn *NoteNode) AddChild(n *Node) {
-	nn.Children = append(nn.Children, n)
+func (fn *NoteNode) AddChild(n *Node) {
+	fn.Children = append(fn.Children, n)
+}
+
+var _ = (fs.NodeReader)((*NoteNode)(nil))
+
+func (fn *NoteNode) Open(ctx context.Context, flags uint32) (fh fs.FileHandle, fuseFlags uint32, errno syscall.Errno) {
+	// TODO: Check Joplin Sync
+	// need host and token
+	// NOTE: If it loads at file opening, I can save a lot of performance at
+	// OnAdd
+	return nil, fuse.FOPEN_KEEP_CACHE, fs.OK
+}
+
+func (fn *NoteNode) Read(ctx context.Context, fh fs.FileHandle, dest []byte, off int64) (fuse.ReadResult, syscall.Errno) {
+	// TODO: Get Data from Joplin ?
+	// need host and token
+	return fn.MemRegularFile.Read(ctx, fh, dest, off)
 }
 
 type RessourceNode struct {

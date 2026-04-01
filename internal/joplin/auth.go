@@ -16,6 +16,7 @@ var (
 	ErrCheckJoplin = errors.New("please check jopling application to grant api access")
 )
 
+// TODO: create a auth struct
 func Authenticate(host string, tokenLocation string) (token string, err error) {
 	_, err = os.Stat(tokenLocation)
 	if os.IsNotExist(err) {
