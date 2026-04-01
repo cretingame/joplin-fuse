@@ -16,8 +16,15 @@ var (
 	ErrCheckJoplin = errors.New("please check jopling application to grant api access")
 )
 
-// TODO: create a auth struct
-func Authenticate(host string, tokenLocation string) (token string, err error) {
+type Session struct {
+	Host  string
+	Token string
+}
+
+func Authenticate(host string, tokenLocation string) (ses *Session, err error) {
+	ses = &Session{
+		Host: host,
+	}
 	_, err = os.Stat(tokenLocation)
 	if os.IsNotExist(err) {
 		var authToken string
@@ -26,16 +33,16 @@ func Authenticate(host string, tokenLocation string) (token string, err error) {
 			return
 		}
 
-		token, err = getToken(host, authToken)
+		ses.Token, err = getToken(host, authToken)
 		for err == ErrCheckJoplin {
 			fmt.Println("Please check joplin application to grant access")
 			time.Sleep(1000 * time.Millisecond)
-			token, err = getToken(host, authToken)
+			ses.Token, err = getToken(host, authToken)
 		}
 		if err != nil {
 			return
 		}
-		err = os.WriteFile(tokenLocation, []byte(token), 0644)
+		err = os.WriteFile(tokenLocation, []byte(ses.Token), 0644)
 		if err != nil {
 			return
 		}
@@ -47,7 +54,7 @@ func Authenticate(host string, tokenLocation string) (token string, err error) {
 	if err != nil {
 		return
 	}
-	token = strings.Trim(string(bs), "\n")
+	ses.Token = strings.Trim(string(bs), "\n")
 	return
 }
 

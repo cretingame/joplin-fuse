@@ -11,13 +11,13 @@ const (
 )
 
 func main() {
-	token, err := joplin.Authenticate(host, tokenLocation)
+	ses, err := joplin.Authenticate(host, tokenLocation)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("token <%s>\n", token)
+	fmt.Printf("token <%s>\n", ses.Token)
 
-	folders, err := joplin.GetItems(host, token, "folders")
+	folders, err := joplin.GetItems(*ses, "folders")
 	if err != nil {
 		panic(err)
 	}
@@ -25,7 +25,7 @@ func main() {
 		fmt.Println(i, folder)
 	}
 
-	notes, err := joplin.GetItems(host, token, "notes")
+	notes, err := joplin.GetItems(*ses, "notes")
 	if err != nil {
 		panic(err)
 	}
@@ -33,7 +33,7 @@ func main() {
 		fmt.Println(i, item)
 	}
 
-	note, err := joplin.GetNote(host, token, notes[0].Id)
+	note, err := joplin.GetNote(*ses, notes[0].Id)
 	if err != nil {
 		panic(err)
 	}

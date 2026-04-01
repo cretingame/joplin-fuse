@@ -2,6 +2,7 @@ package joplin
 
 import (
 	"context"
+	"log"
 	"syscall"
 
 	"github.com/hanwen/go-fuse/v2/fs"
@@ -47,6 +48,8 @@ type NoteNode struct {
 	Parent_id string
 	Name      string
 	Children  []*Node
+
+	Session *Session
 }
 
 func (fn NoteNode) Base() NodeBase {
@@ -65,10 +68,12 @@ func (fn *NoteNode) AddChild(n *Node) {
 var _ = (fs.NodeReader)((*NoteNode)(nil))
 
 func (fn *NoteNode) Open(ctx context.Context, flags uint32) (fh fs.FileHandle, fuseFlags uint32, errno syscall.Errno) {
-	// TODO: Check Joplin Sync
-	// need host and token
-	// NOTE: If it loads at file opening, I can save a lot of performance at
-	// OnAdd
+	log.Println("get note:", fn.Name)
+	noteResponse, err := GetNote(*fn.Session, fn.Id)
+	if err != nil {
+		return nil, fuse.FOPEN_KEEP_CACHE, syscall.EACCES
+	}
+	fn.MemRegularFile.Data = []byte(noteResponse.Body)
 	return nil, fuse.FOPEN_KEEP_CACHE, fs.OK
 }
 

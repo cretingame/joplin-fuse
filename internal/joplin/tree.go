@@ -22,12 +22,12 @@ var _ = (fs.NodeOnAdder)((*JoplinRoot)(nil))
 func NewRoot(host string, tokenLocation string) (JoplinRoot, error) {
 	var items []Node
 
-	token, err := Authenticate(host, tokenLocation)
+	ses, err := Authenticate(host, tokenLocation)
 	if err != nil {
 		return JoplinRoot{}, err
 	}
 
-	folders, err := GetItems(host, token, "folders")
+	folders, err := GetItems(*ses, "folders")
 	if err != nil {
 		return JoplinRoot{}, err
 	}
@@ -43,17 +43,11 @@ func NewRoot(host string, tokenLocation string) (JoplinRoot, error) {
 		items = append(items, &folderNode)
 	}
 
-	notes, err := GetItems(host, token, "notes")
+	notes, err := GetItems(*ses, "notes")
 	if err != nil {
 		return JoplinRoot{}, err
 	}
 	for i := range notes {
-		// TODO: I will do this at note opening
-		noteResponse, err := GetNote(host, token, notes[i].Id)
-		if err != nil {
-			return JoplinRoot{}, err
-		}
-
 		name := notes[i].Title
 		name = removeSpecialCharacters(name)
 		name = sanitizeFilename(name)
@@ -63,14 +57,14 @@ func NewRoot(host string, tokenLocation string) (JoplinRoot, error) {
 			Id:        notes[i].Id,
 			Parent_id: notes[i].Parent_id,
 			Name:      name,
-			// TODO: at note opening
 			MemRegularFile: &fs.MemRegularFile{
-				Data: []byte(noteResponse.Body),
+				Data: []byte{},
 				Attr: fuse.Attr{
 					Mode:  0444,
 					Owner: *fuse.CurrentOwner(),
 				},
 			},
+			Session: ses,
 		}
 
 		items = append(items, &noteNode)
@@ -83,12 +77,13 @@ func NewRoot(host string, tokenLocation string) (JoplinRoot, error) {
 	}
 	items = append(items, &resourceFolderNode)
 
-	resources, err := GetItems(host, token, "resources")
+	resources, err := GetItems(*ses, "resources")
 	if err != nil {
 		return JoplinRoot{}, err
 	}
 	for i := range resources {
-		ressourceBytes, err := GetRessourceFile(host, token, resources[i].Id)
+		// TODO: at file opening
+		ressourceBytes, err := GetRessourceFile(*ses, resources[i].Id)
 		if err != nil {
 			return JoplinRoot{}, err
 		}

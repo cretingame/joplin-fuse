@@ -111,12 +111,12 @@ type ResourceResponse struct {
 	Ocr_error                 string
 }
 
-func GetItems(host string, token string, joplinType string) (items []ItemResponse, err error) {
+func GetItems(ses Session, joplinType string) (items []ItemResponse, err error) {
 	hasMore := true
 	page := 0
 
 	for hasMore {
-		req := fmt.Sprintf("%s/%s?token=%s&page=%d", host, joplinType, token, page)
+		req := fmt.Sprintf("%s/%s?token=%s&page=%d", ses.Host, joplinType, ses.Token, page)
 		response, err := http.Get(req)
 		if err != nil {
 			return items, err
@@ -142,8 +142,8 @@ func GetItems(host string, token string, joplinType string) (items []ItemRespons
 	return items, err
 }
 
-func GetNote(host string, token string, id string) (note NoteResponse, err error) {
-	req := fmt.Sprintf("%s/notes/%s?token=%s&fields=title,body", host, id, token)
+func GetNote(ses Session, id string) (note NoteResponse, err error) {
+	req := fmt.Sprintf("%s/notes/%s?token=%s&fields=title,body", ses.Host, id, ses.Token)
 	response, err := http.Get(req)
 	if err != nil {
 		return
@@ -162,8 +162,8 @@ func GetNote(host string, token string, id string) (note NoteResponse, err error
 	return
 }
 
-func GetFolder(host string, token string, id string) (folder FolderResponse, err error) {
-	req := fmt.Sprintf("%s/folders/%s?token=%s&fields=title,body", host, id, token)
+func GetFolder(ses Session, id string) (folder FolderResponse, err error) {
+	req := fmt.Sprintf("%s/folders/%s?token=%s&fields=title,body", ses.Host, id, ses.Token)
 	response, err := http.Get(req)
 	if err != nil {
 		return
@@ -182,8 +182,8 @@ func GetFolder(host string, token string, id string) (folder FolderResponse, err
 	return
 }
 
-func GetRessource(host string, token string, id string) (ressource ResourceResponse, err error) {
-	req := fmt.Sprintf("%s/resources/%s?token=%s", host, id, token)
+func GetRessource(ses Session, id string) (ressource ResourceResponse, err error) {
+	req := fmt.Sprintf("%s/resources/%s?token=%s", ses.Host, id, ses.Token)
 	response, err := http.Get(req)
 	if err != nil {
 		return
@@ -202,8 +202,8 @@ func GetRessource(host string, token string, id string) (ressource ResourceRespo
 	return
 }
 
-func GetRessourceFile(host string, token string, id string) (bs []byte, err error) {
-	req := fmt.Sprintf("%s/resources/%s/file?token=%s", host, id, token)
+func GetRessourceFile(ses Session, id string) (bs []byte, err error) {
+	req := fmt.Sprintf("%s/resources/%s/file?token=%s", ses.Host, id, ses.Token)
 	response, err := http.Get(req)
 	if err != nil {
 		return
