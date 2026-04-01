@@ -26,20 +26,21 @@ func main() {
 	debug := flag.Bool("debug", false, "print debug data")
 	flag.Parse()
 	if len(flag.Args()) < 1 {
-		log.Fatal("Usage:\n  hello-joplin MOUNTPOINT")
+		log.Fatal("Usage:\n  joplin-fuse MOUNTPOINT")
 	}
 	opts := &fs.Options{
 		UID: fuse.CurrentOwner().Uid,
 		GID: fuse.CurrentOwner().Gid,
 	}
 	opts.Debug = *debug
+
 	server, err := fs.Mount(flag.Arg(0), &root, opts)
 	if err != nil {
 		log.Fatalf("Mount fail: %v\n", err)
 	}
 
 	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
 	go func() {
 		for {
 			s := <-c
