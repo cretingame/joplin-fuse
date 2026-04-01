@@ -65,7 +65,9 @@ func (fn *NoteNode) AddChild(n *Node) {
 	fn.Children = append(fn.Children, n)
 }
 
+var _ = (fs.NodeOpener)((*NoteNode)(nil))
 var _ = (fs.NodeReader)((*NoteNode)(nil))
+var _ = (fs.NodeWriter)((*NoteNode)(nil))
 
 func (fn *NoteNode) Open(ctx context.Context, flags uint32) (fh fs.FileHandle, fuseFlags uint32, errno syscall.Errno) {
 	log.Println("get note:", fn.Name)
@@ -74,7 +76,7 @@ func (fn *NoteNode) Open(ctx context.Context, flags uint32) (fh fs.FileHandle, f
 		return nil, fuse.FOPEN_KEEP_CACHE, syscall.EACCES
 	}
 	fn.MemRegularFile.Data = []byte(noteResponse.Body)
-	return nil, fuse.FOPEN_KEEP_CACHE, fs.OK
+	return fn.MemRegularFile.Open(ctx, flags)
 }
 
 func (fn *NoteNode) Read(ctx context.Context, fh fs.FileHandle, dest []byte, off int64) (fuse.ReadResult, syscall.Errno) {
@@ -83,13 +85,21 @@ func (fn *NoteNode) Read(ctx context.Context, fh fs.FileHandle, dest []byte, off
 	return fn.MemRegularFile.Read(ctx, fh, dest, off)
 }
 
+func (fn *NoteNode) Write(ctx context.Context, fh fs.FileHandle, data []byte, off int64) (uint32, syscall.Errno) {
+	written, errno := fn.MemRegularFile.Write(ctx, fh, data, off)
+	// TODO: sync with Joplin
+	return written, errno
+}
+
 type RessourceNode struct {
+	*fs.MemRegularFile
+
 	Id        string
 	Parent_id string
 	Name      string
 	Children  []*Node
 
-	File *fs.MemRegularFile
+	Session *Session
 }
 
 func (rn RessourceNode) Base() NodeBase {
@@ -103,4 +113,21 @@ func (rn RessourceNode) Base() NodeBase {
 
 func (rn *RessourceNode) AddChild(n *Node) {
 	rn.Children = append(rn.Children, n)
+}
+
+var _ = (fs.NodeOpener)((*RessourceNode)(nil))
+var _ = (fs.NodeReader)((*RessourceNode)(nil))
+
+func (rn *RessourceNode) Open(ctx context.Context, flags uint32) (fh fs.FileHandle, fuseFlags uint32, errno syscall.Errno) {
+	log.Println("get ressource:", rn.Name)
+	ressourceBytes, err := GetRessourceFile(*rn.Session, rn.Id)
+	if err != nil {
+		return fh, fuseFlags, syscall.EACCES
+	}
+	rn.Data = ressourceBytes
+	return rn.MemRegularFile.Open(ctx, flags)
+}
+
+func (rn *RessourceNode) Read(ctx context.Context, fh fs.FileHandle, dest []byte, off int64) (fuse.ReadResult, syscall.Errno) {
+	return rn.MemRegularFile.Read(ctx, fh, dest, off)
 }

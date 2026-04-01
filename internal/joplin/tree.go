@@ -82,23 +82,18 @@ func NewRoot(host string, tokenLocation string) (JoplinRoot, error) {
 		return JoplinRoot{}, err
 	}
 	for i := range resources {
-		// TODO: at file opening
-		ressourceBytes, err := GetRessourceFile(*ses, resources[i].Id)
-		if err != nil {
-			return JoplinRoot{}, err
-		}
-
 		ressourceNode := RessourceNode{
 			Id:        resources[i].Id,
 			Parent_id: resourceFolderNode.Id,
 			Name:      resources[i].Id,
-			File: &fs.MemRegularFile{
-				Data: ressourceBytes,
+			MemRegularFile: &fs.MemRegularFile{
+				Data: []byte{},
 				Attr: fuse.Attr{
 					Mode:  0444,
 					Owner: *fuse.CurrentOwner(),
 				},
 			},
+			Session: ses,
 		}
 
 		items = append(items, &ressourceNode)
@@ -153,7 +148,7 @@ func addNode(ctx context.Context, parentInode *fs.Inode, items []*Node, level in
 			addNode(ctx, childInode, v.Children, level+1)
 		case *RessourceNode:
 			childInode := parentInode.NewPersistentInode(
-				ctx, v.File, v.File.StableAttr())
+				ctx, v, v.StableAttr())
 
 			parentInode.AddChild(v.Name, childInode, false)
 			addNode(ctx, childInode, v.Children, level+1)
