@@ -101,4 +101,4 @@ Contributions are welcome! Please fork the repository and submit a pull request.
 
 ## License
 
-GNU Affero General Public License v3.0 or later
+Mozilla Public License Version 2.
