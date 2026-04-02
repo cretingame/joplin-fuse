@@ -22,12 +22,12 @@ var _ = (fs.NodeOnAdder)((*JoplinRoot)(nil))
 func NewRoot(host string, tokenLocation string) (JoplinRoot, error) {
 	var items []Node
 
-	token, err := Authenticate(host, tokenLocation)
+	ses, err := Authenticate(host, tokenLocation)
 	if err != nil {
 		return JoplinRoot{}, err
 	}
 
-	folders, err := GetItems(host, token, "folders")
+	folders, err := GetItems(*ses, "folders")
 	if err != nil {
 		return JoplinRoot{}, err
 	}
@@ -43,16 +43,11 @@ func NewRoot(host string, tokenLocation string) (JoplinRoot, error) {
 		items = append(items, &folderNode)
 	}
 
-	notes, err := GetItems(host, token, "notes")
+	notes, err := GetItems(*ses, "notes")
 	if err != nil {
 		return JoplinRoot{}, err
 	}
 	for i := range notes {
-		noteResponse, err := GetNote(host, token, notes[i].Id)
-		if err != nil {
-			return JoplinRoot{}, err
-		}
-
 		name := notes[i].Title
 		name = removeSpecialCharacters(name)
 		name = sanitizeFilename(name)
@@ -62,13 +57,14 @@ func NewRoot(host string, tokenLocation string) (JoplinRoot, error) {
 			Id:        notes[i].Id,
 			Parent_id: notes[i].Parent_id,
 			Name:      name,
-			File: &fs.MemRegularFile{
-				Data: []byte(noteResponse.Body),
+			MemRegularFile: &fs.MemRegularFile{
+				Data: []byte{},
 				Attr: fuse.Attr{
-					Mode:  0444,
+					Mode:  0644,
 					Owner: *fuse.CurrentOwner(),
 				},
 			},
+			Session: ses,
 		}
 
 		items = append(items, &noteNode)
@@ -81,27 +77,23 @@ func NewRoot(host string, tokenLocation string) (JoplinRoot, error) {
 	}
 	items = append(items, &resourceFolderNode)
 
-	resources, err := GetItems(host, token, "resources")
+	resources, err := GetItems(*ses, "resources")
 	if err != nil {
 		return JoplinRoot{}, err
 	}
 	for i := range resources {
-		ressourceBytes, err := GetRessourceFile(host, token, resources[i].Id)
-		if err != nil {
-			return JoplinRoot{}, err
-		}
-
 		ressourceNode := RessourceNode{
 			Id:        resources[i].Id,
 			Parent_id: resourceFolderNode.Id,
 			Name:      resources[i].Id,
-			File: &fs.MemRegularFile{
-				Data: ressourceBytes,
+			MemRegularFile: &fs.MemRegularFile{
+				Data: []byte{},
 				Attr: fuse.Attr{
 					Mode:  0444,
 					Owner: *fuse.CurrentOwner(),
 				},
 			},
+			Session: ses,
 		}
 
 		items = append(items, &ressourceNode)
@@ -150,13 +142,13 @@ func addNode(ctx context.Context, parentInode *fs.Inode, items []*Node, level in
 			addNode(ctx, childInode, v.Children, level+1)
 		case *NoteNode:
 			childInode := parentInode.NewPersistentInode(
-				ctx, v.File, v.File.StableAttr())
+				ctx, v, v.StableAttr())
 
 			parentInode.AddChild(v.Name, childInode, false)
 			addNode(ctx, childInode, v.Children, level+1)
 		case *RessourceNode:
 			childInode := parentInode.NewPersistentInode(
-				ctx, v.File, v.File.StableAttr())
+				ctx, v, v.StableAttr())
 
 			parentInode.AddChild(v.Name, childInode, false)
 			addNode(ctx, childInode, v.Children, level+1)
