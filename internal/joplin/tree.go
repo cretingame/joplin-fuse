@@ -60,7 +60,7 @@ func NewRoot(host string, tokenLocation string) (JoplinRoot, error) {
 			MemRegularFile: &fs.MemRegularFile{
 				Data: []byte{},
 				Attr: fuse.Attr{
-					Mode:  0444,
+					Mode:  0644,
 					Owner: *fuse.CurrentOwner(),
 				},
 			},

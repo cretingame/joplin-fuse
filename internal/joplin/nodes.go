@@ -73,21 +73,25 @@ func (fn *NoteNode) Open(ctx context.Context, flags uint32) (fh fs.FileHandle, f
 	log.Println("get note:", fn.Name)
 	noteResponse, err := GetNote(*fn.Session, fn.Id)
 	if err != nil {
-		return nil, fuse.FOPEN_KEEP_CACHE, syscall.EACCES
+		return nil, fuse.FOPEN_KEEP_CACHE, syscall.EIO
 	}
 	fn.MemRegularFile.Data = []byte(noteResponse.Body)
 	return fn.MemRegularFile.Open(ctx, flags)
 }
 
 func (fn *NoteNode) Read(ctx context.Context, fh fs.FileHandle, dest []byte, off int64) (fuse.ReadResult, syscall.Errno) {
-	// TODO: Get Data from Joplin ?
-	// need host and token
+	// TODO: Check integrity
 	return fn.MemRegularFile.Read(ctx, fh, dest, off)
 }
 
 func (fn *NoteNode) Write(ctx context.Context, fh fs.FileHandle, data []byte, off int64) (uint32, syscall.Errno) {
 	written, errno := fn.MemRegularFile.Write(ctx, fh, data, off)
-	// TODO: sync with Joplin
+
+	err := PutNoteBody(*fn.Session, fn.Id, string(fn.MemRegularFile.Data))
+	if err != nil {
+		return 0, syscall.EIO
+	}
+
 	return written, errno
 }
 
@@ -122,7 +126,7 @@ func (rn *RessourceNode) Open(ctx context.Context, flags uint32) (fh fs.FileHand
 	log.Println("get ressource:", rn.Name)
 	ressourceBytes, err := GetRessourceFile(*rn.Session, rn.Id)
 	if err != nil {
-		return fh, fuseFlags, syscall.EACCES
+		return fh, fuseFlags, syscall.EIO
 	}
 	rn.Data = ressourceBytes
 	return rn.MemRegularFile.Open(ctx, flags)

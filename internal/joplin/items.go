@@ -1,6 +1,7 @@
 package joplin
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -157,6 +158,45 @@ func GetNote(ses Session, id string) (note NoteResponse, err error) {
 	err = json.Unmarshal(bs, &note)
 	if err != nil {
 		return
+	}
+
+	return
+}
+
+func PutNoteBody(ses Session, id string, noteBody string) (err error) {
+	url := fmt.Sprintf("%s/notes/%s?token=%s", ses.Host, id, ses.Token)
+
+	// 1. Prepare the payload
+	payload := map[string]any{
+		"body": noteBody,
+	}
+
+	body, err := json.Marshal(payload)
+	if err != nil {
+		return
+	}
+
+	// 2. Create the request
+	req, err := http.NewRequest(http.MethodPut, url, bytes.NewBuffer(body))
+	if err != nil {
+		return
+	}
+
+	// 3. Set headers
+	req.Header.Set("Content-Type", "application/json")
+
+	// 4. Execute
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return
+	}
+	defer resp.Body.Close()
+
+	// 5. Read response
+	respBody, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("cannot put note body, status: %d, body: %s", resp.StatusCode, respBody)
 	}
 
 	return

@@ -28,9 +28,9 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Println("note:", n.Title)
-	fmt.Println("note:", n.Body)
-	fmt.Println("note:", n.Updated_time)
+	fmt.Println("note title:", n.Title)
+	fmt.Println("note body:", n.Body)
+	fmt.Println("note updated_time:", n.Updated_time)
 	fmt.Printf("note: %+v\n", n)
 
 	n.Body = n.Body + "\n\nOK!"
@@ -62,7 +62,6 @@ func PutNote(ses joplin.Session, id string, note joplin.NoteResponse) (err error
 
 	// 3. Set headers
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+ses.Token)
 
 	// 4. Execute
 	client := &http.Client{}
