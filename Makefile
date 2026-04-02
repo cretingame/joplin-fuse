@@ -12,7 +12,6 @@ DESCRIPTION := Joplin Fuse is a Go-based tool that mounts your Joplin notes \
 	       notes as if they were regular files on your system.
 
 EXEC = $(APP_NAME)
-MOUNT_POINT = /run/user/$(shell id -u)/$(EXEC)
 SOURCES = $(shell find . -name "*.go" -not -path "./vendor/*")
 
 build: $(EXEC)
@@ -21,13 +20,6 @@ package: $(BUILD_DIR)/$(DEB_FILE)
 
 $(EXEC): $(SOURCES)
 	go build
-
-$(MOUNT_POINT):
-	install --group=$(shell id -g) --owner=$(shell id -g) --directory $(MOUNT_POINT)
-
-run: $(MOUNT_POINT) $(CURDIR)/$(EXEC)
-	$(CURDIR)/$(EXEC) $(MOUNT_POINT)
-
 
 $(BUILD_DIR)/$(DEB_FILE): build
 	@echo "Packaging .deb file..."
@@ -48,7 +40,6 @@ $(BUILD_DIR)/$(DEB_FILE): build
 
 clean:
 	rm -f $(EXEC)
-	-rmdir $(MOUNT_POINT)
 	rm -rf $(BUILD_DIR)
 
 

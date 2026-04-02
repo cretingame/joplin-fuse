@@ -20,10 +20,31 @@ Joplin Fuse is a Go-based tool that mounts your Joplin notes into a filesystem u
 
 ## Installation
 
+### With Go
+
 To install Joplin Fuse, use the following command:
 
 ```bash
 go install github.com/cretingame/joplin-fuse@latest
+```
+
+To uninstall:
+```bash
+rm ~/go/bin/joplin-fuse
+```
+
+### Ubuntu/Debian Package
+
+Download the last package with the *.deb extention from the release page: https://github.com/cretingame/joplin-fuse/releases .
+
+Execute the command below with root privilege:
+```bash
+dpkg -i build/joplin-fuse_0.0.X_amd64.deb
+```
+
+To uninstall:
+```bash
+dpkg -r joplin-fuse
 ```
 
 ## Usage
@@ -35,6 +56,7 @@ joplin-fuse [MOUNTING POINT]
 For example:
 
 ```bash
+mkdir ~/JoplinMount
 joplin-fuse ~/JoplinMount
 ```
 
