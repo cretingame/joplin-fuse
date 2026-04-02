@@ -5,8 +5,18 @@ Joplin Fuse is a Go-based tool that mounts your Joplin notes into a filesystem u
 ## Features
 
 - Mount Joplin notes as a read-only filesystem
-- Read notes directly from your terminal or file explorer
+- Read and edit notes directly from your terminal or file explorer
 - Simple command-line interface
+
+## Roadmap
+
+- [x] Note Editing
+- [ ] File and folder modification dates
+- [ ] Write Conflict Management
+    - [ ] Detect Conflict
+    - [ ] Copy the clonflicted note
+- [ ] Joplin Link Conversion: `[MyNote](:/3d9be863f25945b88734bfc3012f6b0b)` -> `[MyNote](./MyNotebook/MyNote)`
+- [ ] Removing superflous log messages
 
 ## Installation
 
