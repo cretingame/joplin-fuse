@@ -144,7 +144,7 @@ func GetItems(ses Session, joplinType string) (items []ItemResponse, err error) 
 }
 
 func GetNote(ses Session, id string) (note NoteResponse, err error) {
-	req := fmt.Sprintf("%s/notes/%s?token=%s&fields=title,body", ses.Host, id, ses.Token)
+	req := fmt.Sprintf("%s/notes/%s?token=%s&fields=title,body,updated_time", ses.Host, id, ses.Token)
 	response, err := http.Get(req)
 	if err != nil {
 		return

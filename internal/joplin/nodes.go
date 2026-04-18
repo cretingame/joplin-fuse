@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"syscall"
+	"time"
 
 	"github.com/hanwen/go-fuse/v2/fs"
 	"github.com/hanwen/go-fuse/v2/fuse"
@@ -41,6 +42,8 @@ func (fn *FolderNode) AddChild(n *Node) {
 	fn.Children = append(fn.Children, n)
 }
 
+// TODO: Remove MemRegularFile Field. cf. note below
+// I should direclty use fs.Inode
 type NoteNode struct {
 	*fs.MemRegularFile
 
@@ -68,6 +71,12 @@ func (fn *NoteNode) AddChild(n *Node) {
 var _ = (fs.NodeOpener)((*NoteNode)(nil))
 var _ = (fs.NodeReader)((*NoteNode)(nil))
 var _ = (fs.NodeWriter)((*NoteNode)(nil))
+var _ = (fs.NodeGetattrer)((*NoteNode)(nil))
+
+// NOTE: I might need to load all the notes at the begining
+// When I do `attr` in the terminal, the file contains no data
+// I should improve the synchronization.
+// The Joplin Event will help to catch changes
 
 func (fn *NoteNode) Open(ctx context.Context, flags uint32) (fh fs.FileHandle, fuseFlags uint32, errno syscall.Errno) {
 	log.Println("get note:", fn.Name)
@@ -76,6 +85,12 @@ func (fn *NoteNode) Open(ctx context.Context, flags uint32) (fh fs.FileHandle, f
 		return nil, fuse.FOPEN_KEEP_CACHE, syscall.EIO
 	}
 	fn.MemRegularFile.Data = []byte(noteResponse.Body)
+	// update time was quickly added in a dirty way
+	updated := time.Unix(int64(noteResponse.Updated_time/1000), int64((noteResponse.Updated_time%1000)*1000_000))
+	log.Println("updated:", updated)
+	fn.MemRegularFile.Attr.Atime = uint64(updated.Unix())
+	fn.MemRegularFile.Attr.Ctime = uint64(updated.Unix())
+	fn.MemRegularFile.Attr.Mtime = uint64(updated.Unix())
 	return fn.MemRegularFile.Open(ctx, flags)
 }
 
