@@ -53,7 +53,7 @@ func NewRoot(host string, tokenLocation string) (JoplinRoot, error) {
 		name = sanitizeFilename(name)
 		name = name + ".md"
 
-		noteNode := NoteNode{
+		noteNode := NoteFileNode{
 			Id:        notes[i].Id,
 			Parent_id: notes[i].Parent_id,
 			Name:      name,
@@ -82,7 +82,7 @@ func NewRoot(host string, tokenLocation string) (JoplinRoot, error) {
 		return JoplinRoot{}, err
 	}
 	for i := range resources {
-		ressourceNode := RessourceNode{
+		ressourceNode := ResourceFileNode{
 			Id:        resources[i].Id,
 			Parent_id: resourceFolderNode.Id,
 			Name:      resources[i].Id,
@@ -140,13 +140,13 @@ func addNode(ctx context.Context, parentInode *fs.Inode, items []*Node, level in
 			symInode := childInode.NewPersistentInode(ctx, l, fs.StableAttr{Mode: syscall.S_IFLNK})
 			childInode.AddChild(":", symInode, false)
 			addNode(ctx, childInode, v.Children, level+1)
-		case *NoteNode:
+		case *NoteFileNode:
 			childInode := parentInode.NewPersistentInode(
 				ctx, v, v.StableAttr())
 
 			parentInode.AddChild(v.Name, childInode, false)
 			addNode(ctx, childInode, v.Children, level+1)
-		case *RessourceNode:
+		case *ResourceFileNode:
 			childInode := parentInode.NewPersistentInode(
 				ctx, v, v.StableAttr())
 
