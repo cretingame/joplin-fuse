@@ -18,10 +18,10 @@ type ItemResponse struct {
 	Id                     string
 	Parent_id              string
 	Title                  string
-	Created_time           int // When the folder was created.
-	Updated_time           int // When the folder was last updated.
-	User_created_time      int // When the folder was created. It may differ from created_time as it can be manually set by the user.
-	User_updated_time      int // When the folder was last updated. It may differ from updated_time as it can be manually set by the user.
+	Created_time           Time // When the folder was created.
+	Updated_time           Time // When the folder was last updated.
+	User_created_time      Time // When the folder was created. It may differ from created_time as it can be manually set by the user.
+	User_updated_time      Time // When the folder was last updated. It may differ from updated_time as it can be manually set by the user.
 	Encryption_cipher_text string
 	Encryption_applied     int
 	Is_shared              int
@@ -37,8 +37,8 @@ type NoteResponse struct {
 	Parent_id              string // ID of the notebook that contains this note. Change this ID to move the note to a different notebook.
 	Title                  string // The note title.
 	Body                   string // The note body, in Markdown. May also contain HTML.
-	Created_time           int    // When the note was created.
-	Updated_time           int    // When the note was last updated.
+	Created_time           Time   // When the note was created.
+	Updated_time           Time   // When the note was last updated.
 	Is_conflict            int    // Tells whether the note is a conflict or not.
 	Latitude               float64
 	Longitude              float64
@@ -52,8 +52,8 @@ type NoteResponse struct {
 	Source_application     string
 	Application_data       string
 	Order                  float64
-	User_created_time      int // When the note was created. It may differ from created_time as it can be manually set by the user.
-	User_updated_time      int // When the note was last updated. It may differ from updated_time as it can be manually set by the user.
+	User_created_time      Time // When the note was created. It may differ from created_time as it can be manually set by the user.
+	User_updated_time      Time // When the note was last updated. It may differ from updated_time as it can be manually set by the user.
 	Encryption_cipher_text string
 	Encryption_applied     int
 	Markup_language        int
@@ -62,7 +62,7 @@ type NoteResponse struct {
 	Conflict_original_id   string
 	Master_key_id          string
 	User_data              string
-	Deleted_time           int
+	Deleted_time           Time
 	Body_html              string // Note body, in HTML format
 	Base_url               string // If body_html is provided and contains relative URLs, provide the base_url parameter too so that all the URLs can be converted to absolute ones. The base URL is basically where the HTML was fetched from, minus the query (everything after the '?'). For example if the original page was https://stackoverflow.com/search?q=%5Bjava%5D+test, the base URL is https://stackoverflow.com/search.
 	Image_data_url         string // An image to attach to the note, in Data URL format.
@@ -72,10 +72,10 @@ type NoteResponse struct {
 type FolderResponse struct {
 	Id                     string
 	Title                  string // The folder title.
-	Created_time           int    // When the folder was created.
-	Updated_time           int    // When the folder was last updated.
-	User_created_time      int    // When the folder was created. It may differ from created_time as it can be manually set by the user.
-	User_updated_time      int    // When the folder was last updated. It may differ from updated_time as it can be manually set by the user.
+	Created_time           Time   // When the folder was created.
+	Updated_time           Time   // When the folder was last updated.
+	User_created_time      Time   // When the folder was created. It may differ from created_time as it can be manually set by the user.
+	User_updated_time      Time   // When the folder was last updated. It may differ from updated_time as it can be manually set by the user.
 	Encryption_cipher_text string
 	Encryption_applied     int
 	Parent_id              string
@@ -84,7 +84,7 @@ type FolderResponse struct {
 	Master_key_id          string
 	Icon                   string
 	User_data              string
-	Deleted_time           int
+	Deleted_time           Time
 }
 
 type ResourceResponse struct {
@@ -92,10 +92,10 @@ type ResourceResponse struct {
 	Title                     string // The resource title.
 	Mime                      string
 	Filename                  string
-	Created_time              int // When the resource was created.
-	Updated_time              int // When the resource was last updated.
-	User_created_time         int // When the resource was created. It may differ from created_time as it can be manually set by the user.
-	User_updated_time         int // When the resource was last updated. It may differ from updated_time as it can be manually set by the user.
+	Created_time              Time // When the resource was created.
+	Updated_time              Time // When the resource was last updated.
+	User_created_time         Time // When the resource was created. It may differ from created_time as it can be manually set by the user.
+	User_updated_time         Time // When the resource was last updated. It may differ from updated_time as it can be manually set by the user.
 	File_extension            string
 	Encryption_cipher_text    string
 	Encryption_applied        int
@@ -105,7 +105,7 @@ type ResourceResponse struct {
 	Share_id                  string
 	Master_key_id             string
 	User_data                 string
-	Blob_updated_time         int
+	Blob_updated_time         Time
 	Ocr_text                  string
 	Ocr_details               string
 	Ocr_status                int
